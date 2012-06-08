@@ -16,7 +16,6 @@ class WSGITest(TestCase):
         """
         Verify that ``get_wsgi_application`` returns a functioning WSGI
         callable.
-
         """
         application = get_wsgi_application()
 
@@ -28,7 +27,8 @@ class WSGITest(TestCase):
 
         response_data = {}
 
-        def start_response(status, headers, exc_info):
+        def start_response(status, headers, exc_info=None):
+            # exc_info should be optional as per PEP 3333
             response_data["status"] = status
             response_data["headers"] = headers
 
@@ -43,6 +43,10 @@ class WSGITest(TestCase):
             "Content-Type: text/html; charset=utf-8\n\nHello World!")
 
     def test_wsgi_exception_handling(self):
+        """
+        Verify that exceptions are passed to the user-supplied
+        ``start_response`` callback.
+        """
         application = get_wsgi_application()
         environ = RequestFactory()._base_environ(
             PATH_INFO="/exception",
@@ -50,8 +54,9 @@ class WSGITest(TestCase):
             REQUEST_METHOD="GET"
             )
 
-        def start_response(status, headers, exception):
-            self.assertNotEqual(exception, None)
+        def start_response(status, headers, exc_info=None):
+            # exc_info should be optional as per PEP 3333
+            self.assertNotEqual(exc_info, None)
 
         application(environ, start_response)
 
