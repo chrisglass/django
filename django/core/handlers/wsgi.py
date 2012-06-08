@@ -257,7 +257,7 @@ class WSGIHandler(base.BaseHandler):
         for c in response.cookies.values():
             response_headers.append((b'Set-Cookie', str(c.output(header=''))))
         try:
-            start_response(smart_str(status), response_headers)
+            start_response(smart_str(status), response_headers, exc_info)
         finally:
             exc_info = None
         return response
